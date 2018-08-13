@@ -10,7 +10,7 @@ const message = body.append('div').attr('id', 'message').classed('hidden', true)
 // animation origin boundaries
 const wMin = 0.05 * window.innerWidth
 const wMax = window.innerWidth - wMin
-const hMin = 0.11 * window.innerHeight
+const hMin = (window.innerWidth>460 ? 0.11 : 16) * window.innerHeight
 const hMax = window.innerHeight - 0.06 * window.innerHeight
 // counters and flags
 const endCount = 10 // winning # of circles = () clicked (N/A in Endurance mode)
