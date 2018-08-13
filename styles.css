@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css?family=Comfortaa:700|Oswald:700');
+* {
+  box-sizing: border-box;
+  touch-action: none;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-areas: 'main';
+}
+
+#main {
+  grid-area: main;
+  font-family: 'Monospace';
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-areas: 'ui' 'svg' 'foot';
+  grid-template-rows: 5vh 90vh 5vh;
+}
+
+#ui {
+  grid-area: ui;
+  display: grid;
+  grid-template-areas: 'diff play hiScore score';
+  grid-template-columns: 1fr  2fr   3fr    3fr;
+  grid-gap: 2px;
+  align-items: center;
+  text-align: center;
+  color: #AF0055;
+}
+
+@media screen and (max-width: 460px) {
+  #main {
+    grid-template-rows: 10vh 85vh 5vh;
+  }
+  #ui {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: 'diff     play' 
+                         'hiScore  score';
+  }
+  #hiScore,
+  #score {
+    padding-top: 0;
+    padding-bottom: 3px;
+  }
+}
+
+::selection {
+  background: none;
+}
+
+#svg {
+  grid-area: svg;
+  background-color: #FFF;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  height: 100%;
+  width: 100%;
+  border-top: 1px solid #AF0055;
+  border-bottom: 1px solid #AF0055;
+  filter: drop-shadow(0 0 3px rgba(136, 0, 66, 0.8));
+}
+
+#ui button {
+  cursor: pointer;
+  height: 100%;
+  font-family: Comfortaa;
+  font-weight: bold;
+  color: #FFF;
+  outline: none;
+  border: none;
+  background-color: #AF0055;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  transition: color 0.4s, background-color 0.4s;
+}
+
+#ui button:hover {
+  color: #AF0055;
+  background-color: #FFF;
+}
+
+#difficulty {
+  grid-area: diff;
+}
+
+#play {
+  grid-area: play;
+}
+
+#hiScore {
+  grid-area: hiScore;
+  font-family: Comfortaa;
+  padding-top: 3px;
+}
+
+#score {
+  grid-area: score;
+  font-family: Comfortaa;
+  padding-top: 3px;
+}
+
+#message {
+  grid-area: main;
+  display: grid;
+  grid-column-gap: 8px;
+  align-content: center;
+  text-align: center;
+  font-family: 'Impact', 'Oswald';
+  font-size: 5em;
+  font-weight: bold;
+  color: #AF0055;
+  text-shadow: -2px 2px 8px rgba(0, 0, 0, 1);
+  user-select: none;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.hidden {
+  display: none !important;
+}
