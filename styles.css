@@ -47,6 +47,9 @@ body {
     padding-top: 0;
     padding-bottom: 3px;
   }
+  #message {
+    font-size: 5em;
+  }
 }
 
 ::selection {
@@ -109,7 +112,7 @@ body {
   align-content: center;
   text-align: center;
   font-family: 'Impact', 'Oswald';
-  font-size: 4em;
+  font-size: 5em;
   font-weight: bold;
   color: #AF0055;
   text-shadow: -2px 2px 8px rgba(0, 0, 0, 1);
