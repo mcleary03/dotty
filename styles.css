@@ -34,11 +34,11 @@ body {
 
 @media screen and (max-width: 460px) {
   #main {
-    grid-template-rows: 10vh 85vh 5vh;
+    grid-template-rows: 15vh 80vh 5vh;
   }
   #ui {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 50% 50%;
     grid-template-areas: 'diff     play' 
                          'hiScore  score';
   }
