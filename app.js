@@ -15,14 +15,6 @@ const hMax = window.innerHeight - 0.06 * window.innerHeight
 // counters and flags
 const endCount = 10 // winning # of circles = () clicked (N/A in Endurance mode)
 let count = 0
-let hiScore = window.sessionStorage.getItem('hiScore') || 0
-let score = 0
-let playing = false
-let timer
-const allTimeouts = [] // timeouts
-
-let clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
-
 let levels = {
   casual: {
     text: 'CASUAL',
@@ -42,18 +34,25 @@ let levels = {
 }
 
 let difficulty = levels.casual
-
 diffBtn.text(difficulty.text)
 
+let getHiScore = () => window.localStorage.getItem(`${difficulty.text}HiScore`) || 0
+let setHiScore = score => window.localStorage.setItem(`${difficulty.text}HiScore`, score)
+let score = 0
+let oldHiScore = getHiScore()
+let playing = false
+let timer
+const allTimeouts = [] // timeouts
+
+let clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
+
+
+
 const updateScore = amount => {
-  if (playing) {
-    score += Math.round(amount)
-  } else if (score > hiScore) {
-    window.sessionStorage.setItem('hiScore', score)
-    hiScore = score
-  }
+  score = playing ? score + Math.round(amount) : 0
+  if (score > getHiScore()) setHiScore(score)
   scoreDisplay.text(`SCORE: ${score}`)
-  hiScoreDisplay.text(`HIGH SCORE: ${hiScore}`)
+  hiScoreDisplay.text(`HIGH SCORE: ${getHiScore()}`)
 }
 updateScore(0)
 
@@ -79,18 +78,18 @@ const randomCircle = (rMin = 10, rMax = 20) => ({
   color: randColor()
 })
 
-// data === deltas from 'cryptoAPI.js'
-const dataCircle = data => {
-  const d = Math.abs(data)
-  const gain = data >= 0
-  console.log(d)
-  return {
-    r: d,
-    cx: rand(wMin, wMax),
-    cy: rand(hMin, hMax),
-    color: gain ? 'green' : 'red'
-  }
-}
+// // data === deltas from 'cryptoAPI.js'
+// const dataCircle = data => {
+//   const d = Math.abs(data)
+//   const gain = data >= 0
+//   console.log(d)
+//   return {
+//     r: d,
+//     cx: rand(wMin, wMax),
+//     cy: rand(hMin, hMax),
+//     color: gain ? 'green' : 'red'
+//   }
+// }
 
 const renderCircle = (circObj=randomCircle(), interval=1000) => {
   const { r, cx, cy, color, className } = circObj
@@ -108,11 +107,11 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .ease(d3.easeBounce)
 }
 
-const renderCircles = (data, interval=1000) => {
-  data.forEach( (d, i) => {
-    timeouts.push( setTimeout( () => renderCircle( dataCircle(d), interval ), interval-i*1000) )
-  })
-}
+// const renderCircles = (data, interval=1000) => {
+//   data.forEach( (d, i) => {
+//     timeouts.push( setTimeout( () => renderCircle( dataCircle(d), interval ), interval-i*1000) )
+//   })
+// }
 
 const removeCircle = circ => {
   if (playing) {
@@ -141,9 +140,11 @@ const runCountdown = (time = 950) => {
 
 const reset = () => {
   d3.selectAll('circle').remove()
+  showMessage('')
   timeouts = []
   count = 0
   score = 0
+  oldHiScore = getHiScore()
   updateScore(0)
 }
 
@@ -152,24 +153,32 @@ const startGame = difficulty => {
   playing = true
   playBtn.text('END')
   runCountdown()
-  renderCircles(deltas, difficulty.interval)
+  // renderCircles(deltas, difficulty.interval)
+  timer = setInterval( () => renderCircle(), 3150 )
 }
 
 const endGame = () => {
   const win = count >= endCount
+  const hiScore = getHiScore()
+  updateScore(0)
   playing = false
   playBtn.text('PLAY')
   clearInterval(timer)
   clearAllTimers() // clear timeouts to stop all queued animations
   d3.selectAll('circle').remove()
-  updateScore(0)
 
   if (difficulty !== levels.endurance) {
     win ? spiralDots() : lotsOfDots()
-    showMessage(`YOU ${ win ? 'WIN' : 'LOSE' }!`)
-    if (win && score>hiScore) message.text(`${message.text()} NEW HIGH SCORE ${hiScore}`)
-  } else {
-    showMessage(score>hiScore ? `NEW HIGH SCORE ${hiScore}` : `YOUR SCORE ${score}`)
+    showMessage(score>oldHiScore ? `NEW HIGH SCORE! ${hiScore}` : `YOU ${ win ? 'WIN' : 'LOSE' }!`)
+  } 
+  else { // if Endurance mode
+    if (score>oldHiScore) {
+      spiralDots() // TODO change ending animations for ENDURANCE mode
+      showMessage(`NEW HIGH SCORE ${hiScore}`)
+    } else {
+      lotsOfDots()
+      showMessage(`YOUR SCORE ${score}`)
+    }
   }
 }
 
@@ -178,7 +187,8 @@ const handlePlayBtn = () => playing ? endGame() : startGame(difficulty)
 const changeDifficulty = ( { text }, { casual, normal, endurance } ) => {
   difficulty = text==='CASUAL' ? normal : text==='NORMAL' ? endurance : casual
   diffBtn.text(difficulty.text)
-  if (playing) endGame()
+  playing ? endGame() : updateScore(0)
+  reset()
 }
 
 playBtn.on('click', () => handlePlayBtn())
@@ -227,35 +237,3 @@ const spiralDots = (n = 360, spread = 10) => {
     }, i*6)) // interval between new circles = ()
   }
 }
-
-class Circ {
-  constructor(context, r, cx, cy, color, lifetime=3000, ease=d3.easeBounce ) {
-    this.context = context
-    this.r = r
-    this.cx = cx
-    this.cy = cy
-    this.color = color
-    this.lifetime = lifetime
-    this.ease = ease
-    this.svg
-  }
-
-  render() {
-    const { context, r, cx, cy, color, lifetime, ease } = this
-    this.svg = context.append('circle')
-    this.svg
-    .on('click', () => removeCircle(svg))
-    .attr('gameOver', setTimeout(() => endGame(), lifetime))
-    .attr('birth', new Date())
-    .attr('cursor', 'pointer')
-    .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`) // starting radius and position
-    .attr('fill', `${color}`)
-    .transition()
-    .attr('r', 800) // ending radius
-    .duration(3000) // ms on screen
-    .ease(ease)
-  }
-}
-
-// const a = new Circ(svg, 30, 300, 300, 'blue')
-// a.render()
