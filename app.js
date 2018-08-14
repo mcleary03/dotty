@@ -6,6 +6,7 @@ const playBtn = ui.append('button').attr('id', 'play').text('PLAY')
 const hiScoreDisplay = ui.append('p').attr('id', 'hiScore')
 const scoreDisplay = ui.append('p').attr('id', 'score')
 const svg = main.append('svg').attr('id', 'svg')
+const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('id', 'message').classed('hidden', true)
 // animation origin boundaries
 // const wMin = 0.05 * window.innerWidth

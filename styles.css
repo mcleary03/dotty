@@ -17,7 +17,7 @@ body {
   display: grid;
   width: 100vw;
   height: 100vh;
-  grid-template-areas: 'ui' 'svg' 'foot';
+  grid-template-areas: 'ui' 'svg' 'footer';
   grid-template-rows: 5vh 90vh 5vh;
 }
 
@@ -120,6 +120,13 @@ body {
   user-select: none;
   pointer-events: none;
   z-index: 10000;
+}
+
+#footer {
+  width: 100vw;
+  height: 100%;
+  grid-area: footer;
+  background-color: #ffffff;
 }
 
 .hidden {
