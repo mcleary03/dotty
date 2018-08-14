@@ -94,8 +94,8 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`) // starting radius and position
     .attr('fill', `${color}`)
     .transition()
-    .attr('r', 0.2*Math.max(w,h)) // ending radius 10% of width or height (biggest)
-    .duration(3000) // ms on screen
+    .attr('r', 0.2*Math.max(w,h)) // ending radius 20% of width or height (biggest)
+    .duration(interval*2) // ms on screen
     .ease(d3.easeBounce)
 }
 
@@ -136,11 +136,13 @@ const reset = () => {
 }
 
 const startGame = difficulty => {
+  const [ delay, interval ] = difficulty.text==='CASUAL' ? [ 1000, 2150 ] : [ 800, 2350 ]
   reset()
   playing = true
   playBtn.text('END')
   runCountdown()
-  timer = setInterval( () => renderCircle(), 3150 )
+  timed( () => timer = setInterval( () => renderCircle(), interval), delay )
+  // timer = setInterval( () => renderCircle(), 3150 )
 }
 
 const endGame = () => {
@@ -222,4 +224,10 @@ const spiralDots = (n = 360, spread = 10) => {
         .ease(d3.easeBounce)
     }, i*6) // interval between new circles
   }
+}
+
+// showMessage('Each circle lasts 1 second. Tap them quickly for more points.')
+
+const showIntro = () => {
+
 }
