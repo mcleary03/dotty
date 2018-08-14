@@ -19,7 +19,7 @@ const wMax = w - wOffset
 const hMin = hOffset
 const hMax = h - 0.05 * window.innerHeight
 // counters and flags
-const endCount = 10 // winning # of circles clicked (N/A in Endurance mode)
+const endCount = 2 // winning # of circles clicked (N/A in Endurance mode)
 let count = 0
 let levels = {
   casual: {
@@ -50,7 +50,8 @@ let playing = false
 let timer
 const allTimeouts = []
 
-let clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
+const timed = (cb, ms) => allTimeouts.push(setTimeout(cb,ms))
+const clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
 
 const updateScore = amount => {
   score = playing ? score + Math.round(amount) : 0
@@ -82,19 +83,6 @@ const randomCircle = (rMin = 10, rMax = 20) => ({
   color: randColor()
 })
 
-// // data === deltas from 'cryptoAPI.js'
-// const dataCircle = data => {
-//   const d = Math.abs(data)
-//   const gain = data >= 0
-//   console.log(d)
-//   return {
-//     r: d,
-//     cx: rand(wMin, wMax),
-//     cy: rand(hMin, hMax),
-//     color: gain ? 'green' : 'red'
-//   }
-// }
-
 const renderCircle = (circObj=randomCircle(), interval=1000) => {
   const { r, cx, cy, color, className } = circObj
   const circ = svg.append('circle')
@@ -110,12 +98,6 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .duration(3000) // ms on screen
     .ease(d3.easeBounce)
 }
-
-// const renderCircles = (data, interval=1000) => {
-//   data.forEach( (d, i) => {
-//     timeouts.push( setTimeout( () => renderCircle( dataCircle(d), interval ), interval-i*1000) )
-//   })
-// }
 
 const removeCircle = circ => {
   if (playing) {
@@ -136,15 +118,16 @@ const removeCircle = circ => {
 
 const runCountdown = (time = 950) => {
   showMessage(                  '3')
-  setTimeout( () => showMessage('2'),  time )
-  setTimeout( () => showMessage('1'),  time*2 )
-  setTimeout( () => showMessage('GO'), time*3 )
-  setTimeout(       hideMessage,       time*3 + 300 )
+  timed( () => showMessage('2'),  time )
+  timed( () => showMessage('1'),  time*2 )
+  timed( () => showMessage('GO'), time*3 )
+  timed(       hideMessage,       time*3 + 300 )
 }
 
 const reset = () => {
   d3.selectAll('circle').remove()
   showMessage('')
+  clearAllTimers()
   timeouts = []
   count = 0
   score = 0
@@ -157,7 +140,6 @@ const startGame = difficulty => {
   playing = true
   playBtn.text('END')
   runCountdown()
-  // renderCircles(deltas, difficulty.interval)
   timer = setInterval( () => renderCircle(), 3150 )
 }
 
@@ -200,7 +182,7 @@ diffBtn.on('click', () => changeDifficulty(difficulty, levels))
 
 const lotsOfDots = () => {
   for (let i = 200; i > 0; i--) {
-    allTimeouts.push(setTimeout( () => {
+    timed( () => {
       const { r, cx, cy, color, className } = randomCircle()
       const circ = svg.append('circle')
       circ
@@ -211,7 +193,7 @@ const lotsOfDots = () => {
         .transition()
         .attr('r', rand( 0.01*Math.max(w,h), 0.15*Math.max(w,h)))
         .duration(400 + i * 2) // on-screen circle speed ( goes from 398 to 0)
-    }, i * (i * 0.02) )) // interval between new circles ( goes from 2 to 200 )
+    }, i * (i * 0.02) ) // interval between new circles ( goes from 2 to 200 )
   }
 }
 
@@ -220,7 +202,7 @@ const spiralDots = (n = 360, spread = 10) => {
   let cy = h / 2
 
   for (let i=0; i<=n; i++) {
-      allTimeouts.push(setTimeout(() => {
+      timed(() => {
       angle = 0.3 * i;
       x = cx + (1 + spread * angle) * Math.cos(angle);
       y = cy + (1 + spread * angle) * Math.sin(angle);
@@ -235,10 +217,9 @@ const spiralDots = (n = 360, spread = 10) => {
         .attr('r', `${r}`).attr('cx', `${x}`).attr('cy', `${y}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', n/(w>460?1:2) - i) // ending radius
+        .attr('r', n/(w>460?1:2) - i/(w>460?1:2)) // ending radius
         .duration(3600 - i * 10) // on-screen circle speed
         .ease(d3.easeBounce)
-    }, i*6)) // interval between new circles
+    }, i*6) // interval between new circles
   }
 }
-console.log(w)
