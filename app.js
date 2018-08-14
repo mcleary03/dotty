@@ -110,7 +110,7 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`) // starting radius and position
     .attr('fill', `${color}`)
     .transition()
-    .attr('r', 0.1*Math.max(w,h)) // ending radius 10% of width or height (biggest)
+    .attr('r', 0.2*Math.max(w,h)) // ending radius 10% of width or height (biggest)
     .duration(3000) // ms on screen
     .ease(d3.easeBounce)
 }
@@ -213,7 +213,7 @@ const lotsOfDots = () => {
         .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', rand(20, 0.2*Math.max(w,h)))
+        .attr('r', rand(20, 0.22*Math.max(w,h)))
         .duration(400 + i * 2) // on-screen circle speed ( goes from 0 to 398)
     }, i * (i * 0.02) )) // interval between new circles = () ( goes from 200 to 2 )
   }
