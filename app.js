@@ -213,7 +213,7 @@ const lotsOfDots = () => {
         .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', rand(20, 0.22*Math.max(w,h)))
+        .attr('r', rand( 0.01*Math.max(w,h), 0.15*Math.max(w,h)))
         .duration(400 + i * 2) // on-screen circle speed ( goes from 0 to 398)
     }, i * (i * 0.02) )) // interval between new circles = () ( goes from 200 to 2 )
   }
@@ -239,9 +239,9 @@ const spiralDots = (n = 360, spread = 10) => {
         .attr('r', `${r}`).attr('cx', `${x}`).attr('cy', `${y}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', n - i) // ending radius
+        .attr('r', n/w>460?1:2 - i) // ending radius
         .duration(3600 - i * 10) // on-screen circle speed
         .ease(d3.easeBounce)
-    }, i*6)) // interval between new circles = ()
+    }, i*6)) // interval between new circles
   }
 }
