@@ -51,11 +51,9 @@ let score = 0
 let oldHiScore = getHiScore()
 let playing = false
 let timer
-const allTimeouts = [] // timeouts
+const allTimeouts = []
 
 let clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
-
-
 
 const updateScore = amount => {
   score = playing ? score + Math.round(amount) : 0
@@ -68,7 +66,7 @@ updateScore(0)
 const hideMessage = () => message.classed('hidden', true)
 
 const showMessage = string => {
-  message.html('') // clear prev message
+  message.html('')
   string.split(' ').forEach(word => message.append('span').text(word).classed('word', true))
   message.classed('hidden', false)
 }
@@ -221,8 +219,8 @@ const lotsOfDots = () => {
 }
 
 const spiralDots = (n = 360, spread = 10) => {
-  let cx = window.innerWidth / 2
-  let cy = window.innerHeight / 2
+  let cx = w / 2
+  let cy = h / 2
 
   for (let i=0; i<=n; i++) {
       allTimeouts.push(setTimeout(() => {
