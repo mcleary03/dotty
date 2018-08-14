@@ -8,10 +8,19 @@ const scoreDisplay = ui.append('p').attr('id', 'score')
 const svg = main.append('svg').attr('id', 'svg')
 const message = body.append('div').attr('id', 'message').classed('hidden', true)
 // animation origin boundaries
-const wMin = 0.05 * window.innerWidth
-const wMax = window.innerWidth - wMin
-const hMin = (window.innerWidth>460 ? 0.11 : 16) * window.innerHeight
-const hMax = window.innerHeight - 0.06 * window.innerHeight
+// const wMin = 0.05 * window.innerWidth
+// const wMax = window.innerWidth - wMin
+// const hMin = (window.innerWidth>460 ? 0.11 : 16) * window.innerHeight
+// const hMax = window.innerHeight - 0.06 * window.innerHeight
+const svgBounds = document.querySelector('#svg').getBoundingClientRect()
+const w = svgBounds.width
+const h = svgBounds.height
+const wMin = 0.05*w
+const wMax = w-wMin
+const hMin = 0.06*h
+const hMax = h-0.06*h
+
+
 // counters and flags
 const endCount = 10 // winning # of circles = () clicked (N/A in Endurance mode)
 let count = 0
