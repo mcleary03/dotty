@@ -9,21 +9,17 @@ const svg = main.append('svg').attr('id', 'svg')
 const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('id', 'message').classed('hidden', true)
 // animation origin boundaries
-// const wMin = 0.05 * window.innerWidth
-// const wMax = window.innerWidth - wMin
-// const hMin = (window.innerWidth>460 ? 0.11 : 16) * window.innerHeight
-// const hMax = window.innerHeight - 0.06 * window.innerHeight
+const wOffset = 0.05 * window.innerWidth
+const hOffset = (window.innerWidth>460 ? 0.10 : 0.15) * window.innerHeight
 const svgBounds = document.querySelector('#svg').getBoundingClientRect()
 const w = svgBounds.width
 const h = svgBounds.height
-const wMin = 0.05*w
-const wMax = w-wMin
-const hMin = 0.06*h
-const hMax = h-0.06*h
-
-
+const wMin = wOffset
+const wMax = w - wOffset
+const hMin = hOffset
+const hMax = h - 0.05 * window.innerHeight
 // counters and flags
-const endCount = 10 // winning # of circles = () clicked (N/A in Endurance mode)
+const endCount = 10 // winning # of circles clicked (N/A in Endurance mode)
 let count = 0
 let levels = {
   casual: {
@@ -214,8 +210,8 @@ const lotsOfDots = () => {
         .attr('fill', `${color}`)
         .transition()
         .attr('r', rand( 0.01*Math.max(w,h), 0.15*Math.max(w,h)))
-        .duration(400 + i * 2) // on-screen circle speed ( goes from 0 to 398)
-    }, i * (i * 0.02) )) // interval between new circles = () ( goes from 200 to 2 )
+        .duration(400 + i * 2) // on-screen circle speed ( goes from 398 to 0)
+    }, i * (i * 0.02) )) // interval between new circles ( goes from 2 to 200 )
   }
 }
 
@@ -239,9 +235,10 @@ const spiralDots = (n = 360, spread = 10) => {
         .attr('r', `${r}`).attr('cx', `${x}`).attr('cy', `${y}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', n/w>460?1:2 - i) // ending radius
+        .attr('r', n/(w>460?1:2) - i) // ending radius
         .duration(3600 - i * 10) // on-screen circle speed
         .ease(d3.easeBounce)
     }, i*6)) // interval between new circles
   }
 }
+console.log(w)
