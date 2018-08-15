@@ -10,7 +10,7 @@ const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('id', 'message').classed('hidden', true)
 // animation origin boundaries
 const wOffset = 0.05 * window.innerWidth
-const hOffset = (window.innerWidth>460 ? 0.10 : 0.15) * window.innerHeight
+const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
 const svgBounds = document.querySelector('#svg').getBoundingClientRect()
 const w = svgBounds.width
 const h = svgBounds.height
@@ -29,12 +29,12 @@ let levels = {
   },
   normal: {
     text: 'NORMAL',
-    interval: 2000,
+    interval: 1500,
     multiplier: 1.5
   },
   endurance: {
     text: 'ENDURANCE',
-    interval: 2000,
+    interval: 1500,
     multiplier: 1.5
   }
 }
@@ -136,11 +136,12 @@ const reset = () => {
 }
 
 const startGame = difficulty => {
+  const { interval } = difficulty
   reset()
   playing = true
   playBtn.text('END')
   runCountdown()
-  timer = setInterval( () => renderCircle(), 3150 )
+  setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
 }
 
 const endGame = () => {
