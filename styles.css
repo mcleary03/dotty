@@ -86,7 +86,7 @@ body {
   padding-top: 3px;
 }
 
-#message {
+.message {
   grid-area: main;
   display: grid;
   grid-column-gap: 8px;
@@ -102,10 +102,28 @@ body {
   z-index: 10000;
 }
 
+.fadeInOut {
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0
+  }
+  50% {
+    opacity: 1
+  }
+  100% {
+    opacity: 0
+  }
+}
+
 #logo {
   font-family: Helvetica;
-  font-size: 550px;
-  line-height: 1em;
+  font-size: 370px;
+  user-select: none;
+  pointer-events: none;
+  
 }
 
 #footer {

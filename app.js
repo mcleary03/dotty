@@ -7,7 +7,7 @@ const hiScoreDisplay = ui.append('p').attr('id', 'hiScore')
 const scoreDisplay = ui.append('p').attr('id', 'score')
 const svg = main.append('svg').attr('id', 'svg')
 const footer = main.append('div').attr('id', 'footer')
-const message = body.append('div').attr('id', 'message').classed('hidden', true)
+const message = body.append('div').attr('class', 'message').classed('hidden', true)
 // animation origin boundaries
 const wOffset = 0.05 * window.innerWidth
 const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
@@ -138,6 +138,7 @@ const reset = () => {
 const startGame = difficulty => {
   const { interval } = difficulty
   reset()
+  startPrompt.remove()
   playing = true
   playBtn.text('END')
   runCountdown()
@@ -209,6 +210,7 @@ const spiralDots = (n = 360, spread = 10) => {
       y = cy + (1 + spread * angle) * Math.sin(angle);
 
       const r = 0 // starting radius
+      const rEnd = n/(w>650||h>400?1:2) - i/(w>650||h>400?1:2)
       color = randColor()
 
       const circ = svg.append('circle')
@@ -218,50 +220,52 @@ const spiralDots = (n = 360, spread = 10) => {
         .attr('r', `${r}`).attr('cx', `${x}`).attr('cy', `${y}`)
         .attr('fill', `${color}`)
         .transition()
-        .attr('r', n/(w>460?1:2) - i/(w>460?1:2)) // ending radius
+        .attr('r', rEnd) // ending radius
         .duration(3600 - i * 10) // on-screen circle speed
         .ease(d3.easeBounce)
     }, i*6) // interval between new circles
   }
 }
 
-// .attr('transform', d3.transform('translate(30) rotate(45 50 50) translate(1,1) translate(1,1)').toString())
-// const logoContainer = svg.append('g')
-//   .transition()
-//   .delay(2000)
-//   .attr('transform', `rotate(1080)`)
-//   .duration(3000)
-//   .ease(d3.easeCubic)
-//   .remove()
+
+const startPrompt = () => {
+  showMessage('Tap PLAY')
+  message.classed('fadeInOut', true)
+}
 
 // const logo = d3.select('g').append('g')
 const logo = svg.append('g')
-  .attr('transform', `translate(${w/3} ${h/3}) scale(0)`)
+.attr('transform', `translate(${w/2} ${h/2}) scale(0)`)
 
 logoBG = logo.append('circle')
-  .attr('r', '150px')
+  .attr('r', '100px')
   .attr('fill', '#AF0055')
   
 const logoText = logo.append('text')
   .text('e')
-  .attr('x', '-150')
-  .attr('y', '141')
+  .attr('x', -100)
+  .attr('y', 93)
   .attr('id', 'logo')
   .attr('fill', '#fff')
 
-logo.transition()
-  .attr('transform', `translate(${w/3} ${h/3}) scale(1)`)
-  .duration(1500)
-  .ease(d3.easeBounce)
+logo
   .transition()
-  .attr('transform', `translate(${-w} ${h/3})`)
+  .attr('transform', `translate(${w/2} ${h/2}) scale(1)`) // grow to full size
+  .duration(1300)
+  .ease(d3.easeBounce)
+  .delay(0)
+  .transition()
+  .attr('transform', `translate(${-w*2} ${h/2})`) // leave screen
+  .duration(2000)
   .ease(d3.easeExp)
+  .on('end', startPrompt)
   .remove()
 
 logoText.transition()
-  .attr('x', 100)
+  .attr('x', 90)
   .attr('fill', '#AF0055')
-  .duration(1200)
-  .delay(900)
+  .duration(1500)
+  .delay(1000)
+
 
 console.log(logo)
