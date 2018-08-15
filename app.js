@@ -94,8 +94,8 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .attr('r', `${r}`).attr('cx', `${cx}`).attr('cy', `${cy}`) // starting radius and position
     .attr('fill', `${color}`)
     .transition()
-    .attr('r', 0.2*Math.max(w,h)) // ending radius 20% of width or height (biggest)
-    .duration(interval*2) // ms on screen
+    .attr('r', 0.2*Math.max(w,h)) // ending radius 10% of width or height (biggest)
+    .duration(3000) // ms on screen
     .ease(d3.easeBounce)
 }
 
@@ -136,13 +136,11 @@ const reset = () => {
 }
 
 const startGame = difficulty => {
-  const [ delay, interval ] = difficulty.text==='CASUAL' ? [ 1000, 2150 ] : [ 800, 2350 ]
   reset()
   playing = true
   playBtn.text('END')
   runCountdown()
-  timed( () => timer = setInterval( () => renderCircle(), interval), delay )
-  // timer = setInterval( () => renderCircle(), 3150 )
+  timer = setInterval( () => renderCircle(), 3150 )
 }
 
 const endGame = () => {
@@ -226,8 +224,43 @@ const spiralDots = (n = 360, spread = 10) => {
   }
 }
 
-// showMessage('Each circle lasts 1 second. Tap them quickly for more points.')
+// .attr('transform', d3.transform('translate(30) rotate(45 50 50) translate(1,1) translate(1,1)').toString())
+// const logoContainer = svg.append('g')
+//   .transition()
+//   .delay(2000)
+//   .attr('transform', `rotate(1080)`)
+//   .duration(3000)
+//   .ease(d3.easeCubic)
+//   .remove()
 
-const showIntro = () => {
+// const logo = d3.select('g').append('g')
+const logo = svg.append('g')
+  .attr('transform', `translate(${w/3} ${h/3}) scale(0)`)
 
-}
+logoBG = logo.append('circle')
+  .attr('r', '150px')
+  .attr('fill', '#AF0055')
+  
+const logoText = logo.append('text')
+  .text('e')
+  .attr('x', '-150')
+  .attr('y', '141')
+  .attr('id', 'logo')
+  .attr('fill', '#fff')
+
+logo.transition()
+  .attr('transform', `translate(${w/3} ${h/3}) scale(1)`)
+  .duration(1500)
+  .ease(d3.easeBounce)
+  .transition()
+  .attr('transform', `translate(${-w} ${h/3})`)
+  .ease(d3.easeExp)
+  .remove()
+
+logoText.transition()
+  .attr('x', 100)
+  .attr('fill', '#AF0055')
+  .duration(1200)
+  .delay(900)
+
+console.log(logo)

@@ -102,6 +102,12 @@ body {
   z-index: 10000;
 }
 
+#logo {
+  font-family: Helvetica;
+  font-size: 550px;
+  line-height: 1em;
+}
+
 #footer {
   width: 100vw;
   height: 100%;
@@ -113,7 +119,7 @@ body {
   display: none !important;
 }
 
-@media screen and (max-width: 460px) {
+@media screen and (max-width: 650px) {
   #main {
     grid-template-rows: 15vh 80vh 5vh;
   }
@@ -130,5 +136,11 @@ body {
   }
   #message {
     font-size: 2.5em;
+  }
+}
+
+@media screen and (max-height: 400px) {
+  #main {
+    grid-template-rows: 15vh 80vh 5vh;
   }
 }
