@@ -66,7 +66,7 @@ const hideMessage = () => message.classed('hidden', true)
 const showMessage = string => {
   message.html('')
   string.split(' ').forEach(word => message.append('span').text(word).classed('word', true))
-  message.classed('hidden', false)
+  message.classed('hidden fadeInOut', false)
 }
 
 const rand = (min = 0, max = 100) => Math.floor(Math.random() * (max - min)) + min // max not inclusive
@@ -128,6 +128,7 @@ const reset = () => {
   d3.selectAll('circle').remove()
   showMessage('')
   clearAllTimers()
+  if (logo) logo.remove()
   timeouts = []
   count = 0
   score = 0
@@ -138,7 +139,6 @@ const reset = () => {
 const startGame = difficulty => {
   const { interval } = difficulty
   reset()
-  startPrompt.remove()
   playing = true
   playBtn.text('END')
   runCountdown()
@@ -229,8 +229,10 @@ const spiralDots = (n = 360, spread = 10) => {
 
 
 const startPrompt = () => {
-  showMessage('Tap PLAY')
-  message.classed('fadeInOut', true)
+  if (!playing) {
+    showMessage('Tap PLAY')
+    message.classed('fadeInOut', true)
+  }
 }
 
 // const logo = d3.select('g').append('g')
