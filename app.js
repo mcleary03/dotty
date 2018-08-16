@@ -229,10 +229,8 @@ const spiralDots = (n = 360, spread = 10) => {
 
 
 const startPrompt = () => {
-  if (!playing) {
-    showMessage('Tap PLAY')
-    message.classed('fadeInOut', true)
-  }
+  showMessage('Tap PLAY')
+  message.classed('fadeInOut', true)
 }
 
 // const logo = d3.select('g').append('g')
