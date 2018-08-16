@@ -59,7 +59,6 @@ const updateScore = amount => {
   scoreDisplay.text(`SCORE: ${score}`)
   hiScoreDisplay.text(`HIGH SCORE: ${getHiScore()}`)
 }
-updateScore(0)
 
 const hideMessage = () => message.classed('hidden', true)
 
@@ -101,23 +100,22 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
 
 const removeCircle = circ => {
   if (playing) {
-    const {
-      interval,
-      multiplier
-    } = difficulty
+    const { interval, multiplier } = difficulty
+
     clearTimeout(circ.attr('gameOver')) // remove this circle's gameOver timer
-    count++ // increment number of circles = () touched
-    const points = interval - (new Date() - new Date(circ.attr('birth'))) // points determined by amount of time on screen before touching the circle
-    console.log('count: ', count, 'score: ', new Date() - new Date(circ.attr('birth')) / 100)
-    console.log('points: ' + points)
+    count++ // increment number of circles touched
+    // points determined by amount of time on screen before touching the circle
+    const points = interval - (new Date() - new Date(circ.attr('birth'))) 
     updateScore(points * multiplier)
-    if (difficulty !== levels.endurance && count >= endCount) endGame() // ignore count if Endurance mode
+    // ignore count if Endurance mode
+    if (difficulty !== levels.endurance && count >= endCount) endGame()
   }
+
   circ.on('click', null).attr('pointer-events', 'none').transition().attr('r', 0).duration(1000).remove()
 }
 
 const runCountdown = (time = 950) => {
-  showMessage(                  '3')
+  showMessage(             '3')
   timed( () => showMessage('2'),  time )
   timed( () => showMessage('1'),  time*2 )
   timed( () => showMessage('GO'), time*3 )
@@ -128,7 +126,7 @@ const reset = () => {
   d3.selectAll('circle').remove()
   showMessage('')
   clearAllTimers()
-  if (logo) logo.remove()
+  if (logo!=='undefined') logo.remove()
   timeouts = []
   count = 0
   score = 0
@@ -179,9 +177,6 @@ const changeDifficulty = ( { text }, { casual, normal, endurance } ) => {
   reset()
 }
 
-playBtn.on('click', () => handlePlayBtn())
-diffBtn.on('click', () => changeDifficulty(difficulty, levels))
-
 const lotsOfDots = () => {
   for (let i = 200; i > 0; i--) {
     timed( () => {
@@ -227,45 +222,52 @@ const spiralDots = (n = 360, spread = 10) => {
   }
 }
 
+const showAnimatedLogoAndPrompt = context => {
+  const startPrompt = str => {
+    showMessage(str)
+    message.classed('fadeInOut', true)
+  }
 
-const startPrompt = () => {
-  showMessage('Tap PLAY')
-  message.classed('fadeInOut', true)
+  const logo = context.append('g')
+    .attr('transform', `translate(${w/2} ${h/2}) scale(0)`)
+
+  logoBG = logo.append('circle')
+    .attr('r', '100px')
+    .attr('fill', '#AF0055')
+    
+  const logoText = logo.append('text')
+    .text('e')
+    .attr('x', -100)
+    .attr('y', 93)
+    .attr('id', 'logo')
+    .attr('fill', '#fff')
+
+  logo
+    .transition() // grow full size center screen
+    .attr('transform', `translate(${w/2} ${h/2}) scale(1)`)
+    .duration(1300)
+    .ease(d3.easeBounce)
+    .delay(0)
+    .transition() // leave screen left
+    .attr('transform', `translate(${-w*2} ${h/2})`)
+    .duration(2000)
+    .ease(d3.easeExp)
+    .on('end', () => startPrompt('Tap PLAY')) // then display 'press start' message
+    .remove()
+
+  logoText
+    .transition() // after 1 second, slide right and turn pink
+    .attr('x', 90)
+    .attr('fill', '#AF0055')
+    .duration(1500)
+    .delay(1000)
 }
 
-// const logo = d3.select('g').append('g')
-const logo = svg.append('g')
-.attr('transform', `translate(${w/2} ${h/2}) scale(0)`)
+const init = () => {
+  updateScore(0)
+  playBtn.on('click', handlePlayBtn)
+  diffBtn.on('click', () => changeDifficulty(difficulty, levels))
+  showAnimatedLogoAndPrompt(svg)
+}
 
-logoBG = logo.append('circle')
-  .attr('r', '100px')
-  .attr('fill', '#AF0055')
-  
-const logoText = logo.append('text')
-  .text('e')
-  .attr('x', -100)
-  .attr('y', 93)
-  .attr('id', 'logo')
-  .attr('fill', '#fff')
-
-logo
-  .transition()
-  .attr('transform', `translate(${w/2} ${h/2}) scale(1)`) // grow to full size
-  .duration(1300)
-  .ease(d3.easeBounce)
-  .delay(0)
-  .transition()
-  .attr('transform', `translate(${-w*2} ${h/2})`) // leave screen
-  .duration(2000)
-  .ease(d3.easeExp)
-  .on('end', startPrompt)
-  .remove()
-
-logoText.transition()
-  .attr('x', 90)
-  .attr('fill', '#AF0055')
-  .duration(1500)
-  .delay(1000)
-
-
-console.log(logo)
+init()
