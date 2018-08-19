@@ -8,6 +8,7 @@ const scoreDisplay = ui.append('p').attr('id', 'score')
 const svg = main.append('svg').attr('id', 'svg')
 const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('class', 'message').classed('hidden', true)
+let logo
 // animation origin boundaries
 const wOffset = 0.05 * window.innerWidth
 const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
@@ -126,7 +127,7 @@ const reset = () => {
   d3.selectAll('circle').remove()
   showMessage('')
   clearAllTimers()
-  if (logo!=='undefined') logo.remove()
+  logo.remove()
   timeouts = []
   count = 0
   score = 0
@@ -228,7 +229,7 @@ const showAnimatedLogoAndPrompt = context => {
     message.classed('fadeInOut', true)
   }
 
-  const logo = context.append('g')
+  logo = context.append('g')
     .attr('transform', `translate(${w/2} ${h/2}) scale(0)`)
 
   logoBG = logo.append('circle')
