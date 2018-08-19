@@ -265,9 +265,9 @@ const showAnimatedLogoAndPrompt = context => {
 
 const init = () => {
   updateScore(0)
+  showAnimatedLogoAndPrompt(svg)
   playBtn.on('click', handlePlayBtn)
   diffBtn.on('click', () => changeDifficulty(difficulty, levels))
-  showAnimatedLogoAndPrompt(svg)
 }
 
 init()
