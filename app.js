@@ -1,3 +1,4 @@
+// build DOM elements
 const body = d3.select('body')
 const main = body.append('div').attr('id', 'main')
 const ui = main.append('div').attr('id', 'ui')
@@ -9,6 +10,7 @@ const svg = main.append('svg').attr('id', 'svg')
 const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('class', 'message').classed('hidden', true)
 let logo
+
 // animation origin boundaries
 const wOffset = 0.05 * window.innerWidth
 const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
@@ -19,6 +21,7 @@ const wMin = wOffset
 const wMax = w - wOffset
 const hMin = hOffset
 const hMax = h - 0.05 * window.innerHeight
+
 // counters and flags
 const endCount = 2 // winning # of circles clicked (N/A in Endurance mode)
 let count = 0
@@ -40,8 +43,10 @@ let levels = {
   }
 }
 
+
 let difficulty = levels.casual
 diffBtn.text(difficulty.text)
+
 
 let getHiScore = () => window.localStorage.getItem(`${difficulty.text}HiScore`) || 0
 let setHiScore = score => window.localStorage.setItem(`${difficulty.text}HiScore`, score)
@@ -51,8 +56,10 @@ let playing = false
 let timer
 const allTimeouts = []
 
+
 const timed = (cb, ms) => allTimeouts.push(setTimeout(cb,ms))
 const clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
+
 
 const updateScore = amount => {
   score = playing ? score + Math.round(amount) : 0
@@ -61,7 +68,9 @@ const updateScore = amount => {
   hiScoreDisplay.text(`HIGH SCORE: ${getHiScore()}`)
 }
 
+
 const hideMessage = () => message.classed('hidden', true)
+
 
 const showMessage = string => {
   message.html('')
@@ -69,12 +78,15 @@ const showMessage = string => {
   message.classed('hidden fadeInOut', false)
 }
 
+
 const rand = (min = 0, max = 100) => Math.floor(Math.random() * (max - min)) + min // max not inclusive
+
 
 const randColor = () => {
   const hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F']
   return `#${hex[rand(0,16)]}${hex[rand(0,16)]}${hex[rand(0,16)]}${hex[rand(0,16)]}${hex[rand(0,16)]}${hex[rand(0,16)]}`
 }
+
 
 const randomCircle = (rMin = 10, rMax = 20) => ({
   r: rand(rMin, rMax),
@@ -83,11 +95,12 @@ const randomCircle = (rMin = 10, rMax = 20) => ({
   color: randColor()
 })
 
+
 const renderCircle = (circObj=randomCircle(), interval=1000) => {
   const { r, cx, cy, color, className } = circObj
   const circ = svg.append('circle')
   circ
-    .on('click', () => removeCircle(circ))
+    // .on('click', () => removeCircle(circ))
     .attr('gameOver', setTimeout(() => endGame(), interval))
     .attr('birth', new Date())
     .attr('cursor', 'pointer')
@@ -98,6 +111,7 @@ const renderCircle = (circObj=randomCircle(), interval=1000) => {
     .duration(3000) // ms on screen
     .ease(d3.easeBounce)
 }
+
 
 const removeCircle = circ => {
   if (playing) {
@@ -115,6 +129,7 @@ const removeCircle = circ => {
   circ.on('click', null).attr('pointer-events', 'none').transition().attr('r', 0).duration(1000).remove()
 }
 
+
 const runCountdown = (time = 950) => {
   showMessage(             '3')
   timed( () => showMessage('2'),  time )
@@ -122,6 +137,7 @@ const runCountdown = (time = 950) => {
   timed( () => showMessage('GO'), time*3 )
   timed(       hideMessage,       time*3 + 300 )
 }
+
 
 const reset = () => {
   d3.selectAll('circle').remove()
@@ -135,14 +151,22 @@ const reset = () => {
   updateScore(0)
 }
 
+
 const startGame = difficulty => {
   const { interval } = difficulty
   reset()
   playing = true
   playBtn.text('END')
   runCountdown()
+  
+  svg.on('click', e => {
+    let el = d3.select(d3.event.target)
+    if (el.attr('id')!=='svg') removeCircle(el)
+  })
+
   setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
 }
+
 
 const endGame = () => {
   const win = count >= endCount
@@ -169,7 +193,9 @@ const endGame = () => {
   }
 }
 
+
 const handlePlayBtn = () => playing ? endGame() : startGame(difficulty)
+
 
 const changeDifficulty = ( { text }, { casual, normal, endurance } ) => {
   difficulty = text==='CASUAL' ? normal : text==='NORMAL' ? endurance : casual
@@ -177,6 +203,7 @@ const changeDifficulty = ( { text }, { casual, normal, endurance } ) => {
   playing ? endGame() : updateScore(0)
   reset()
 }
+
 
 const lotsOfDots = () => {
   for (let i = 200; i > 0; i--) {
@@ -194,6 +221,7 @@ const lotsOfDots = () => {
     }, i * (i * 0.02) ) // interval between new circles ( goes from 2 to 200 )
   }
 }
+
 
 const spiralDots = (n = 360, spread = 10) => {
   let cx = w / 2
@@ -222,6 +250,7 @@ const spiralDots = (n = 360, spread = 10) => {
     }, i*6) // interval between new circles
   }
 }
+
 
 const showAnimatedLogoAndPrompt = context => {
   const startPrompt = str => {
@@ -264,11 +293,13 @@ const showAnimatedLogoAndPrompt = context => {
     .delay(1000)
 }
 
+
 const init = () => {
   updateScore(0)
   showAnimatedLogoAndPrompt(svg)
   playBtn.on('click', handlePlayBtn)
   diffBtn.on('click', () => changeDifficulty(difficulty, levels))
 }
+
 
 init()
