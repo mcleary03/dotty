@@ -11,6 +11,11 @@ const footer = main.append('div').attr('id', 'footer')
 const message = body.append('div').attr('class', 'message').classed('hidden', true)
 let logo
 
+const coin = 'BTC'
+const dataLimit = 119
+// array of values based on minute by minute trades, takes symbol and limit args
+const asyncData = getHistData(coin, dataLimit)
+
 // animation origin boundaries
 const wOffset = 0.05 * window.innerWidth
 const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
@@ -23,33 +28,37 @@ const hMin = hOffset
 const hMax = h - 0.05 * window.innerHeight
 
 // counters and flags
-const endCount = 2 // winning # of circles clicked (N/A in Endurance mode)
+const endCount = 120 // winning # of circles clicked (N/A in Endurance mode)
 let count = 0
 let levels = {
   casual: {
-    text: 'CASUAL',
+    name: 'CASUAL',
     interval: 3000,
     multiplier: 1
   },
   normal: {
-    text: 'NORMAL',
+    name: 'NORMAL',
     interval: 1500,
     multiplier: 1.5
   },
   endurance: {
-    text: 'ENDURANCE',
+    name: 'ENDURANCE',
     interval: 1500,
     multiplier: 1.5
+  },
+  crypto: {
+    name: 'CRYPTO',
+    interval: 1500,
   }
 }
 
 
 let difficulty = levels.casual
-diffBtn.text(difficulty.text)
+diffBtn.text(difficulty.name)
 
 
-let getHiScore = () => window.localStorage.getItem(`${difficulty.text}HiScore`) || 0
-let setHiScore = score => window.localStorage.setItem(`${difficulty.text}HiScore`, score)
+let getHiScore = () => window.localStorage.getItem(`${difficulty.name}HiScore`) || 0
+let setHiScore = score => window.localStorage.setItem(`${difficulty.name}HiScore`, score)
 let score = 0
 let oldHiScore = getHiScore()
 let playing = false
@@ -58,6 +67,7 @@ const allTimeouts = []
 
 
 const timed = (cb, ms) => allTimeouts.push(setTimeout(cb,ms))
+
 const clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
 
 
@@ -96,11 +106,8 @@ const randomCircle = (rMin = 10, rMax = 20) => ({
 })
 
 
-const renderCircle = (circObj=randomCircle(), interval=1000) => {
-  const { r, cx, cy, color, className } = circObj
+const renderCircle = ({ r, cx, cy, color, className }=randomCircle(), interval=1000) => {
   const circ = svg.append('circle')
-  circ
-    // .on('click', () => removeCircle(circ))
     .attr('gameOver', setTimeout(() => endGame(), interval))
     .attr('birth', new Date())
     .attr('cursor', 'pointer')
@@ -123,9 +130,17 @@ const removeCircle = circ => {
     const points = interval - (new Date() - new Date(circ.attr('birth'))) 
     updateScore(points * multiplier)
     // ignore count if Endurance mode
-    if (difficulty !== levels.endurance && count >= endCount) endGame()
+    if (difficulty.name !== 'endurance' && count >= endCount) endGame()
   }
 
+  circ.on('click', null).attr('pointer-events', 'none').transition().attr('r', 0).duration(1000).remove()
+}
+
+const chaChing = circ => {
+  if (playing) {
+    const val = circ.attr('value')
+    updateScore(val)
+  }
   circ.on('click', null).attr('pointer-events', 'none').transition().attr('r', 0).duration(1000).remove()
 }
 
@@ -140,7 +155,7 @@ const runCountdown = (time = 950) => {
 
 
 const reset = () => {
-  d3.selectAll('circle').remove()
+  const allCircs = d3.selectAll('circle').remove()
   showMessage('')
   clearAllTimers()
   logo.remove()
@@ -154,17 +169,44 @@ const reset = () => {
 
 const startGame = difficulty => {
   const { interval } = difficulty
+  const crypto = difficulty.name==='CRYPTO'
   reset()
   playing = true
   playBtn.text('END')
   runCountdown()
   
   svg.on('click', e => {
-    let el = d3.select(d3.event.target)
-    if (el.attr('id')!=='svg') removeCircle(el)
+    let circ = d3.select(d3.event.target)
+    crypto ? chaChing(circ) : removeCircle(circ)
   })
 
-  setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
+  crypto ? cryptoTradeMode() : setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
+}
+
+const cryptoTradeMode = () => {
+  timed( () => {
+    asyncData
+      .then( data => {
+        data.forEach( (d, i) => {
+          timed( () => {
+            const circ = svg.append('circle')
+            // .attr('gameOver', timed(() => endGame(), difficulty.interval))
+            .attr('birth', new Date())
+            .attr('cursor', 'pointer')
+            .attr('r', 0) // start radius
+            .attr('cx', `${rand(wMin,wMax)}`)
+            .attr('cy', `${rand(hMin, hMax)}`)
+            .attr('value', d)
+            .attr('fill', `${d>0 ? '#d81c2f' : '#1cd81c'}`)
+            .transition()
+            .attr('r', Math.abs(d)) // ending radius 10% of width or height (biggest)
+            .duration(difficulty.interval) // ms on screen
+            .ease(d3.easeBounce)
+            .remove()
+          }, i*500 )
+        })
+      })
+  }, 3000)
 }
 
 
@@ -178,7 +220,7 @@ const endGame = () => {
   clearAllTimers() // clear timeouts to stop all queued animations
   d3.selectAll('circle').remove()
 
-  if (difficulty !== levels.endurance) {
+  if (difficulty.name !== 'endurance') {
     win ? spiralDots() : lotsOfDots()
     showMessage(score>oldHiScore ? `NEW HIGH SCORE! ${hiScore}` : `YOU ${ win ? 'WIN' : 'LOSE' }!`)
   } 
@@ -197,9 +239,13 @@ const endGame = () => {
 const handlePlayBtn = () => playing ? endGame() : startGame(difficulty)
 
 
-const changeDifficulty = ( { text }, { casual, normal, endurance } ) => {
-  difficulty = text==='CASUAL' ? normal : text==='NORMAL' ? endurance : casual
-  diffBtn.text(difficulty.text)
+const changeDifficulty = ( currDifficulty, levels ) => {
+  const names = Object.keys(levels)
+  const idx = names.indexOf(currDifficulty.name.toLowerCase()) + 1
+  const level = names[ idx ]
+  difficulty = levels[level]
+  diffBtn.text(difficulty.name)
+
   playing ? endGame() : updateScore(0)
   reset()
 }
