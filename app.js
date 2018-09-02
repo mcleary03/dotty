@@ -176,8 +176,10 @@ const startGame = difficulty => {
   runCountdown()
   
   svg.on('click', e => {
-    let circ = d3.select(d3.event.target)
-    crypto ? chaChing(circ) : removeCircle(circ)
+    if (d3.select(d3.event.target).attr('r')) {
+      let circ = d3.select(d3.event.target)
+      crypto ? chaChing(circ) : removeCircle(circ)
+    }
   })
 
   crypto ? cryptoTradeMode() : setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
@@ -189,15 +191,14 @@ const cryptoTradeMode = () => {
       .then( data => {
         data.forEach( (d, i) => {
           timed( () => {
+            console.log(d)
             const circ = svg.append('circle')
-            // .attr('gameOver', timed(() => endGame(), difficulty.interval))
-            .attr('birth', new Date())
             .attr('cursor', 'pointer')
             .attr('r', 0) // start radius
             .attr('cx', `${rand(wMin,wMax)}`)
             .attr('cy', `${rand(hMin, hMax)}`)
             .attr('value', d)
-            .attr('fill', `${d>0 ? '#d81c2f' : '#1cd81c'}`)
+            .attr('fill', `${d < 0 ? '#d81c2f' : '#1cd81c'}`)
             .transition()
             .attr('r', Math.abs(d)) // ending radius 10% of width or height (biggest)
             .duration(difficulty.interval) // ms on screen
@@ -207,6 +208,8 @@ const cryptoTradeMode = () => {
         })
       })
   }, 3000)
+
+  timed( () => endGame(), 62000)
 }
 
 
@@ -220,18 +223,17 @@ const endGame = () => {
   clearAllTimers() // clear timeouts to stop all queued animations
   d3.selectAll('circle').remove()
 
-  if (difficulty.name !== 'endurance') {
-    win ? spiralDots() : lotsOfDots()
-    showMessage(score>oldHiScore ? `NEW HIGH SCORE! ${hiScore}` : `YOU ${ win ? 'WIN' : 'LOSE' }!`)
-  } 
-  else { // if Endurance mode
+  if (['ENDURANCE', 'CRYPTO'].includes(difficulty.name)) {
     if (score>oldHiScore) {
-      spiralDots() // TODO change ending animations for ENDURANCE mode
+      spiralDots()
       showMessage(`NEW HIGH SCORE ${hiScore}`)
     } else {
       lotsOfDots()
       showMessage(`YOUR SCORE ${score}`)
     }
+  } else {
+    win ? spiralDots() : lotsOfDots()
+    showMessage(score>oldHiScore ? `NEW HIGH SCORE! ${hiScore}` : `YOU ${ win ? 'WIN' : 'LOSE' }!`)
   }
 }
 
@@ -242,7 +244,7 @@ const handlePlayBtn = () => playing ? endGame() : startGame(difficulty)
 const changeDifficulty = ( currDifficulty, levels ) => {
   const names = Object.keys(levels)
   const idx = names.indexOf(currDifficulty.name.toLowerCase()) + 1
-  const level = names[ idx ]
+  const level = names[ idx % names.length ]
   difficulty = levels[level]
   diffBtn.text(difficulty.name)
 
