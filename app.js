@@ -16,7 +16,7 @@ const dataLimit = 119
 // array of values based on minute by minute trades, takes symbol and limit args
 const asyncData = getHistData(coin, dataLimit)
 
-// animation origin boundaries
+// boundaries
 const wOffset = 0.05 * window.innerWidth
 const hOffset = (window.innerWidth>650||window.innerHeight>400 ? 0.10 : 0.15) * window.innerHeight
 const svgBounds = document.querySelector('#svg').getBoundingClientRect()
@@ -27,8 +27,7 @@ const wMax = w - wOffset
 const hMin = hOffset
 const hMax = h - 0.05 * window.innerHeight
 
-// counters and flags
-const endCount = 120 // winning # of circles clicked (N/A in Endurance mode)
+const endCount = 10 // winning # of circles tapped (N/A in Endurance and Crypto modes)
 let count = 0
 let levels = {
   casual: {
@@ -191,7 +190,6 @@ const cryptoTradeMode = () => {
       .then( data => {
         data.forEach( (d, i) => {
           timed( () => {
-            console.log(d)
             const circ = svg.append('circle')
             .attr('cursor', 'pointer')
             .attr('r', 0) // start radius
