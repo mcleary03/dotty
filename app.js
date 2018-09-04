@@ -33,21 +33,25 @@ let levels = {
   casual: {
     name: 'CASUAL',
     interval: 3000,
-    multiplier: 1
+    multiplier: 1,
+    instructions: 'Slow interval, more points for quick taps, 10 dots'
   },
   normal: {
     name: 'NORMAL',
     interval: 1500,
-    multiplier: 1.5
+    multiplier: 1.5,
+    instructions: 'Faster interval, more points, 10 dots'
   },
   endurance: {
     name: 'ENDURANCE',
     interval: 1500,
-    multiplier: 1.5
+    multiplier: 1.5,
+    instructions: 'Infinite dots, go for high score'
   },
   crypto: {
     name: 'CRYPTO',
     interval: 1500,
+    instructions: 'Dot size based on Bitcoin transactions over the past 2 hours. Color based on value increase/decrease.  Green adds points, Red subtracts them.  You have 1 minute'
   }
 }
 
@@ -64,7 +68,7 @@ let playing = false
 let timer
 const allTimeouts = []
 
-
+// ALL intervals should be done using timed() to allow intervals to later be cancelled
 const timed = (cb, ms) => allTimeouts.push(setTimeout(cb,ms))
 
 const clearAllTimers = () => allTimeouts.forEach( circle => clearTimeout(circle) )
@@ -81,10 +85,11 @@ const updateScore = amount => {
 const hideMessage = () => message.classed('hidden', true)
 
 
-const showMessage = string => {
+const showMessage = (string, className='') => {
   message.html('')
   string.split(' ').forEach(word => message.append('span').text(word).classed('word', true))
-  message.classed('hidden fadeInOut', false)
+  message.classed(`hidden fadeInOut`, false)
+  message.classed(`${className}`, true)
 }
 
 
@@ -156,6 +161,7 @@ const runCountdown = (time = 950) => {
 const reset = () => {
   const allCircs = d3.selectAll('circle').remove()
   showMessage('')
+  message.classed('instructions', false)
   clearAllTimers()
   logo.remove()
   timeouts = []
@@ -167,8 +173,8 @@ const reset = () => {
 
 
 const startGame = difficulty => {
-  const { interval } = difficulty
-  const crypto = difficulty.name==='CRYPTO'
+  const { name, interval } = difficulty
+  const crypto = name==='CRYPTO'
   reset()
   playing = true
   playBtn.text('END')
@@ -182,6 +188,13 @@ const startGame = difficulty => {
   })
 
   crypto ? cryptoTradeMode() : setTimeout( () => timer = setInterval( () => renderCircle(), interval) , 3150 - interval )
+}
+
+const getRadius = (n, max) => {
+  if (n<max/4) return 25
+  if (n<max/2) return 50
+  if (n<max)   return 100
+  return 150
 }
 
 const cryptoTradeMode = () => {
@@ -198,7 +211,7 @@ const cryptoTradeMode = () => {
             .attr('value', d)
             .attr('fill', `${d < 0 ? '#d81c2f' : '#1cd81c'}`)
             .transition()
-            .attr('r', Math.abs(d)) // ending radius 10% of width or height (biggest)
+            .attr('r', getRadius(Math.abs(d), 100)) // ending radius 10% of width or height (biggest)
             .duration(difficulty.interval) // ms on screen
             .ease(d3.easeBounce)
             .remove()
@@ -248,6 +261,7 @@ const changeDifficulty = ( currDifficulty, levels ) => {
 
   playing ? endGame() : updateScore(0)
   reset()
+  showMessage(difficulty.instructions, 'instructions')
 }
 
 
